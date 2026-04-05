@@ -7,6 +7,7 @@ GBDA302 Week 4 Example 5: Blob Platformer (JSON + Classes)
 ## Authors
 
 Karen Cochrane and David Han
+Nia Brathwaite (nbrathwa) - 21109855
 
 ---
 
@@ -38,5 +39,6 @@ N/A
 ## GenAI
 
 The code was written by Dr. Karen Cochrane and David Han but they used GenAI to write the comments.
+Nia Brathwaite forked the code written by Dr. Karen Cochrane and David Han and made use of GenAI to complete the assignment requirements.
 
 ---

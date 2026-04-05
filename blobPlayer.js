@@ -162,6 +162,15 @@ class BlobPlayer {
     this.onGround = false;
   }
 
+  getAABB() {
+    return {
+      x: this.x - this.r,
+      y: this.y - this.r,
+      w: this.r * 2,
+      h: this.r * 2,
+    };
+  }
+
   /*
   Draw the blob with a wobbly outline:
   - we sample a noise value around the circle

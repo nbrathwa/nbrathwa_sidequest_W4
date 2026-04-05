@@ -48,22 +48,63 @@ class WorldLevel {
       r: levelJson.start?.r ?? 26,
     };
 
-    // Convert raw platform objects into Platform instances.
-    this.platforms = (levelJson.platforms || []).map((p) => new Platform(p));
+    // Build the world platforms from JSON tile data and explicit platforms.
+    this.platforms = [];
+    const tileSize = levelJson.tileSize;
+    const tileMap = levelJson.tileMap;
+
+    if (tileMap && tileSize) {
+      for (let row = 0; row < tileMap.length; row++) {
+        const rowData = tileMap[row];
+        for (let col = 0; col < rowData.length; col++) {
+          if (rowData[col] === "1") {
+            this.platforms.push(
+              new Platform({
+                x: col * tileSize,
+                y: row * tileSize,
+                w: tileSize,
+                h: tileSize,
+              }),
+            );
+          }
+        }
+      }
+    }
+
+    this.platforms.push(...(levelJson.platforms || []).map((p) => new Platform(p)));
+
+    // A goal area that triggers the next level when reached.
+    this.goal = levelJson.goal ? Object.assign({ color: "#FFD700" }, levelJson.goal) : null;
   }
 
   /*
   If you want the canvas to fit the world, you can infer width/height by
-  finding the maximum x+w and y+h across all platforms.
+  finding the maximum x+w and y+h across all platforms and the goal.
   */
   inferWidth(defaultW = 640) {
-    if (!this.platforms.length) return defaultW;
-    return max(this.platforms.map((p) => p.x + p.w));
+    let maxX = 0;
+
+    for (const p of this.platforms) {
+      maxX = max(maxX, p.x + p.w);
+    }
+    if (this.goal) {
+      maxX = max(maxX, this.goal.x + this.goal.w);
+    }
+
+    return maxX || defaultW;
   }
 
   inferHeight(defaultH = 360) {
-    if (!this.platforms.length) return defaultH;
-    return max(this.platforms.map((p) => p.y + p.h));
+    let maxY = 0;
+
+    for (const p of this.platforms) {
+      maxY = max(maxY, p.y + p.h);
+    }
+    if (this.goal) {
+      maxY = max(maxY, this.goal.y + this.goal.h);
+    }
+
+    return maxY || defaultH;
   }
 
   /*
@@ -74,6 +115,11 @@ class WorldLevel {
     background(color(this.theme.bg));
     for (const p of this.platforms) {
       p.draw(color(this.theme.platform));
+    }
+
+    if (this.goal) {
+      fill(color(this.goal.color));
+      rect(this.goal.x, this.goal.y, this.goal.w, this.goal.h);
     }
   }
 }

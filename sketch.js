@@ -20,6 +20,8 @@ let levelIndex = 0;
 
 let world; // WorldLevel instance (current level)
 let player; // BlobPlayer instance
+let levelCompleted = false;
+let completionTimer = 0;
 
 function preload() {
   // Load the level data from disk before setup runs.
@@ -47,7 +49,24 @@ function draw() {
   player.update(world.platforms);
   player.draw(world.theme.blob);
 
-  // 3) HUD
+  // 3) Level completion: detect goal overlap and auto-advance.
+  if (world.goal && !levelCompleted) {
+    if (overlapAABB(player.getAABB(), world.goal)) {
+      levelCompleted = true;
+      completionTimer = 60;
+    }
+  }
+
+  if (levelCompleted) {
+    fill(0);
+    text("Level complete! Loading next...", 10, 54);
+    completionTimer -= 1;
+    if (completionTimer <= 0) {
+      loadLevel((levelIndex + 1) % data.levels.length);
+    }
+  }
+
+  // 4) HUD
   fill(0);
   text(world.name, 10, 18);
   text("Move: A/D or ←/→ • Jump: Space/W/↑ • Next: N", 10, 36);
@@ -74,6 +93,8 @@ Load a level by index:
 */
 function loadLevel(i) {
   levelIndex = i;
+  levelCompleted = false;
+  completionTimer = 0;
 
   // Create the world object from the JSON level object.
   world = new WorldLevel(data.levels[levelIndex]);
